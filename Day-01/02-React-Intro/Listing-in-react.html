@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Salary Calculator</title>
+	<style>
+		.field{
+			margin-bottom: 10px;
+		}
+		label{
+			display: block;
+		}
+		#divResult{
+			color : red;
+			font-size: 20pt;
+			font-weight: bold;
+		}
+		.notInStock{
+			color : red;
+			text-decoration: line-through;
+		}
+	</style>
+	<script src="browser.min.js"></script>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="jquery-1.12.4.js"></script>
+	<script type="text/babel">
+		var Items = React.createClass({
+
+			render : function(){
+				var data = [
+					{name : 'pen',  inStock : true},
+					{name : 'book',  inStock : true},
+					{name : 'marker',  inStock : false},
+					{name : 'mouse', inStock : true},
+				];
+				var items = data.map(function(item){
+					return (
+						item.inStock ? <li>{item.name}</li> : <li className="notInStock">{item.name}</li>
+					)
+				})
+				return (
+					<ol>
+						{items}
+					</ol>
+				)
+			}
+		})
+		
+		ReactDOM.render(<Items></Items>, document.getElementById("divContent"));
+	</script>
+	
+</head>
+<body>
+	<h1>List of Items</h1>
+	<hr>
+	<div id="divContent">
+		
+	</div>
+</body>
+</html>
