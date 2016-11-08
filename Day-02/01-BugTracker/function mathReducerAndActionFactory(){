@@ -1,0 +1,47 @@
+function mathReducerAndActionFactory(){
+	var identity = Symbol();
+
+	function mathReducer(initialState = 0, action){
+       if (action[identity] === identity){
+           console.info('mathReducer ', action);
+           if (action.type === 'ADD'){
+              return initialState + action.payload;
+           }
+           if (action.type === 'SUBTRACT'){
+              return initialState - action.payload;
+           }
+           return initialState;
+       }
+       return initialState;
+    }
+    var actionFactory = {
+    	createAddAction : function(payload){
+    		var action = {};
+    		action[identity] = identity;
+    		action.type = 'ADD';
+    		action.payload = payload;
+    		return action;
+    	},
+    	createSubtractAction : function(payload){
+    		var action = {};
+    		action[identity] = identity;
+    		action.type = 'SUBTRACT';
+    		action.payload = payload;
+    		return action;
+    	},
+    }
+    return {
+    	reducer : mathReducer,
+    	actionFactory : actionFactory
+    }
+}
+
+var {reducer : mathReducer, actionFactory} = mathReducerAndActionFactory();
+
+var store = createStore(mathReducer);
+var addAction = actionFactory.createAddAction(10);
+store.dispatch(addAction);
+
+var subAction = actionFactory.createSubtractAction(5);
+store.dispatch(subAction);
+
