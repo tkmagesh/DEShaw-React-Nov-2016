@@ -35,16 +35,40 @@
 	<script type="text/babel">
 		window.bugList = (function(){
 			var bugs = [
-				"User actions not recognized",
-				"Server communication failure",
-				"Application not responsive"
+				{id : 1, name : "User actions not recognized", isClosed : true},
+				{id : 2, name : "Server communication failure", isClosed : true},
+				{id : 3, name : "Application not responsive", isClosed : false},
 			];
 			function getAllBugs(){
 				return bugs.slice(0);
 			}
-			function addBug(bug){
-				bugs.push(bug);
+			function addBug(bugName){
+				var newId = bugs.reduce(function(result, bug){
+					return result > bug.id ? result : bug.id
+				})+1;
+				var newBug = {
+					id : newId,
+					name : bugName,
+					isClosed : false
+				};
+				bugs.push(newBug);
 				triggerChange();
+			}
+
+			function removeClosed(){
+				bugs = bugs.filter(function(bug){
+					return !bug.isClosed;
+				});
+				triggerChange();
+			}
+			function toggleBug(bug){
+				bug.isClosed = !bug.isClosed;
+				triggerChange();
+			}
+			function getClosedCount(){
+				return bugs.reduce(function(result, bug){
+					return bug.isClosed ? ++result : result;
+				},0);
 			}
 			var _listeners = [];
 			function subscribeChange(listenerFn){
@@ -57,27 +81,56 @@
 			}
 			return {
 				add : addBug,
+				removeClosed : removeClosed,
+				toggle : toggleBug,
 				getAll : getAllBugs,
+				getClosedCount : getClosedCount,
 				subscribe : subscribeChange
 			}
 		})();
+
+		var BugItem = React.createClass({
+			onBugItemClick : function(){
+				var bug = this.props.bug;
+				bug.isClosed = !bug.isClosed;
+			},
+			render : function(){
+				var bug = this.props.bug;
+				return (
+					bug.isClosed ? 
+							<li className="closed" onClick={this.onBugItemClick}>{bug.name}</li> 
+							: <li onClick={this.onBugItemClick}>{bug.name}</li>
+				);
+			}
+		})
 
 		var BugTracker = React.createClass({
 			onAddNewBugClick : function(){
 				var bugName = this.refs.txtNewBugName.value;
 				this.props.bugsRepo.add(bugName)
 			},
+			onRemoveClosedClick : function(){
+				this.props.bugsRepo.removeClosed();
+			},
+			onBugItemClick : function(bug){
+				this.props.bugsRepo.toggle(bug);
+			},
 			render : function(){
 				var bugs = this.props.bugsRepo.getAll();
+				
+				var closedCount = this.props.bugsRepo.getClosedCount();
+
+				var self = this;
+
 				var bugItems = bugs.map(function(bug, index){
 					return (
-						<li key={index}>{bug}</li>
-					)
+						<BugItem key={bug.id} bug={bug}></BugItem>
+					);
 				});
 				return (
 					<div>
 						<section className="stats">
-							<span className="closed">1</span>
+							<span className="closed">{closedCount}</span>
 							<span> / </span>
 							<span>{bugs.length}</span>
 						</section>
@@ -85,7 +138,7 @@
 							<label htmlFor="">Bug :</label>
 							<input type="text" ref="txtNewBugName" />
 							<input type="button" value="Add New" onClick={this.onAddNewBugClick}/>
-							<input type="button" value="Remove Closed" />
+							<input type="button" value="Remove Closed" onClick={this.onRemoveClosedClick}/>
 							<ol>
 								{bugItems}
 							</ol>
