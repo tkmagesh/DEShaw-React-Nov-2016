@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Bug Tracker</title>
+	<style>
+		.closed{
+			color : red;
+			text-decoration: line-through;
+			font-style: italic;
+			font-weight: bold;
+		}
+		.stats{
+			font-size: 20pt;
+		}
+		li{
+			cursor: pointer;
+			border : 1px solid gray;
+			background-color: #e7e7e7;
+			font-size: 20pt;
+			margin-bottom: 5px;
+			border-radius: 4px;
+			padding: 5px;
+		}
+		ol{
+			width: 500px;
+			list-style: none;
+			-webkit-padding-start: 0px;
+		}
+
+	</style>
+	<script src="browser.min.js"></script>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script type="text/babel">
+		window.bugList = (function(){
+			var bugs = [
+				"User actions not recognized",
+				"Server communication failure",
+				"Application not responsive"
+			];
+			function getAllBugs(){
+				return bugs.slice(0);
+			}
+			return {
+				getAll : getAllBugs
+			}
+		})();
+
+		var BugTracker = React.createClass({
+			render : function(){
+				var bugs = this.props.bugsRepo.getAll();
+				var bugItems = bugs.map(function(bug, index){
+					return (
+						<li key={index}>{bug}</li>
+					)
+				});
+				return (
+					<div>
+						<section className="stats">
+							<span className="closed">1</span>
+							<span> / </span>
+							<span>{bugs.length}</span>
+						</section>
+						<section>
+							<label htmlFor="">Bug :</label>
+							<input type="text" name="" id="" />
+							<input type="button" value="Add New" />
+							<input type="button" value="Remove Closed" />
+							<ol>
+								{bugItems}
+							</ol>
+						</section>
+					</div>
+				);
+			}
+		})
+		
+		ReactDOM.render(<BugTracker bugsRepo={bugList}></BugTracker>, document.getElementById("content"));
+	</script>
+</head>
+<body>
+	<h1>Bug Tracker</h1>
+	<hr>
+	<div id="content"></div>
+</body>
+</html>
