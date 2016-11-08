@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Bug Tracker</title>
+	<style>
+		.closed{
+			color : red;
+			text-decoration: line-through;
+			font-style: italic;
+			font-weight: bold;
+		}
+		.stats{
+			font-size: 20pt;
+		}
+		li{
+			cursor: pointer;
+			border : 1px solid gray;
+			background-color: #e7e7e7;
+			font-size: 20pt;
+			margin-bottom: 5px;
+			border-radius: 4px;
+			padding: 5px;
+		}
+		ol{
+			width: 500px;
+			list-style: none;
+			-webkit-padding-start: 0px;
+		}
+
+	</style>
+	<script src="browser.min.js"></script>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script type="text/babel">
+		function createStore(reducer){
+			var state = reducer();
+
+			function getState(){
+				return state;
+			}
+			_listeners = [];
+			function subscribe(listenerFn){
+				_listeners.push(listenerFn);
+			}
+			function triggerChange(){
+				_listeners.forEach(listenerFn => listnerFn());
+			}
+			function dispatch(action){
+				var newState = reducer(state, action);
+				if (newState === state) return;
+				state = newState;
+				triggerChange();
+			}
+			return {
+				getState : getState,
+				subscribe : subscribe,
+				dispatch : dispatch
+			}
+		}
+		function bugsReducer(currentState = [], action = {type : null}){
+			switch(action.type){
+				case 'Add_NEW':
+					var newId = currentState.reduce(function(result, bug){
+						return result > bug.id ? result : bug.id
+					})+1;
+					var newBug = {
+						id : newId,
+						name : action.payload,
+						isClosed : false
+					};
+					return currentState.concat([newBug])
+					break;
+				case 'TOGGLE':
+					var bug = action.payload;
+					var updatedBug = {
+						id : bug.id,
+						name : bug.name,
+						isClosed : !bug.isClosed
+					};
+					return currentState.filter(function(bug){
+						return bug.id !== updatedBug.id
+					}).concat([updatedBug]);
+
+					break;
+				case 'REMOVE_CLOSED':
+					return currentState.filter(function(bug){
+						return !bug.isClosed;
+					})
+					break;
+				default :
+					return currentState;
+
+			}
+		}
+		
+		/* var store = createStore(bugsReducer); */
+
+		/* var BugItem = React.createClass({
+			onBugItemClick : function(){
+				var bug = this.props.bug;
+				bug.isClosed = !bug.isClosed;
+			},
+			render : function(){
+				var bug = this.props.bug;
+				return (
+					bug.isClosed ? 
+							<li className="closed" onClick={this.onBugItemClick}>{bug.name}</li> 
+							: <li onClick={this.onBugItemClick}>{bug.name}</li>
+				);
+			}
+		})
+
+		var BugTracker = React.createClass({
+			onAddNewBugClick : function(){
+				var bugName = this.refs.txtNewBugName.value;
+				this.props.bugsRepo.add(bugName)
+			},
+			onRemoveClosedClick : function(){
+				this.props.bugsRepo.removeClosed();
+			},
+			onBugItemClick : function(bug){
+				this.props.bugsRepo.toggle(bug);
+			},
+			render : function(){
+				var bugs = this.props.bugsRepo.getAll();
+				
+				var closedCount = this.props.bugsRepo.getClosedCount();
+
+				var self = this;
+
+				var bugItems = bugs.map(function(bug, index){
+					return (
+						<BugItem key={bug.id} bug={bug}></BugItem>
+					);
+				});
+				return (
+					<div>
+						<section className="stats">
+							<span className="closed">{closedCount}</span>
+							<span> / </span>
+							<span>{bugs.length}</span>
+						</section>
+						<section>
+							<label htmlFor="">Bug :</label>
+							<input type="text" ref="txtNewBugName" />
+							<input type="button" value="Add New" onClick={this.onAddNewBugClick}/>
+							<input type="button" value="Remove Closed" onClick={this.onRemoveClosedClick}/>
+							<ol>
+								{bugItems}
+							</ol>
+						</section>
+					</div>
+				);
+			}
+		})
+		function appRender(){
+			ReactDOM.render(<BugTracker bugsRepo={bugList}></BugTracker>, document.getElementById("content"));
+		}
+		appRender();
+		bugList.subscribe(appRender); */
+	</script>
+</head>
+<body>
+	<h1>Bug Tracker</h1>
+	<hr>
+	<div id="content"></div>
+</body>
+</html>
