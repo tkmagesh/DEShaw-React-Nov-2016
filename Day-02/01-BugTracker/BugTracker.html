@@ -42,12 +42,31 @@
 			function getAllBugs(){
 				return bugs.slice(0);
 			}
+			function addBug(bug){
+				bugs.push(bug);
+				triggerChange();
+			}
+			var _listeners = [];
+			function subscribeChange(listenerFn){
+				_listeners.push(listenerFn);
+			}
+			function triggerChange(){
+				_listeners.forEach(function(listenerFn){
+					listenerFn();
+				});
+			}
 			return {
-				getAll : getAllBugs
+				add : addBug,
+				getAll : getAllBugs,
+				subscribe : subscribeChange
 			}
 		})();
 
 		var BugTracker = React.createClass({
+			onAddNewBugClick : function(){
+				var bugName = this.refs.txtNewBugName.value;
+				this.props.bugsRepo.add(bugName)
+			},
 			render : function(){
 				var bugs = this.props.bugsRepo.getAll();
 				var bugItems = bugs.map(function(bug, index){
@@ -64,8 +83,8 @@
 						</section>
 						<section>
 							<label htmlFor="">Bug :</label>
-							<input type="text" name="" id="" />
-							<input type="button" value="Add New" />
+							<input type="text" ref="txtNewBugName" />
+							<input type="button" value="Add New" onClick={this.onAddNewBugClick}/>
 							<input type="button" value="Remove Closed" />
 							<ol>
 								{bugItems}
@@ -75,8 +94,11 @@
 				);
 			}
 		})
-		
-		ReactDOM.render(<BugTracker bugsRepo={bugList}></BugTracker>, document.getElementById("content"));
+		function appRender(){
+			ReactDOM.render(<BugTracker bugsRepo={bugList}></BugTracker>, document.getElementById("content"));
+		}
+		appRender();
+		bugList.subscribe(appRender);
 	</script>
 </head>
 <body>
